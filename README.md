@@ -2,7 +2,7 @@
 
 A simple HTTP router for Go.
 
-Reimplemented [Custom HTTP Routing in Go](https://gist.github.com/reagent/043da4661d2984e9ecb1ccb5343bf438) to write human-readable routes.
+Reimplemented [Custom HTTP Routing in Go](https://gist.github.com/reagent/043da4661d2984e9ecb1ccb5343bf438) to write human-readable routes and to easily parse values from URI.
 
 
 ### Install
