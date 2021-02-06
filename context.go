@@ -8,7 +8,7 @@ import (
 type Context struct {
 	http.ResponseWriter
 	*http.Request
-	Params []string
+	Params map[string]string
 }
 
 type Error struct {
@@ -35,4 +35,14 @@ func (ctx *Context) WriteError(code int, err string) {
 
 	jsonData, _ := json.Marshal(&Error{Error: err})
 	ctx.ResponseWriter.Write(jsonData)
+}
+
+func (ctx *Context) setURLValues(keys, values []string) {
+	for i, key := range keys {
+		ctx.Set(key, values[i])
+	}
+}
+
+func (ctx *Context) Set(key, value string) {
+	ctx.Params[key] = value
 }

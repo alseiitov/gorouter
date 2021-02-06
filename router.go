@@ -13,6 +13,7 @@ type Route struct {
 	Pattern *regexp.Regexp
 	Handler Handler
 	Method  string
+	Keys    []string
 }
 
 type Router struct {
@@ -41,38 +42,42 @@ func (r *Router) PATCH(pattern string, handler Handler) {
 }
 
 func (r *Router) handle(pattern string, handler Handler, method string) {
-	re := patternToRegex(pattern)
-	route := Route{Pattern: re, Handler: handler, Method: method}
+	regex, keys := readPatternAndKeys(pattern)
+	route := Route{Pattern: regex, Handler: handler, Method: method, Keys: keys}
 
 	r.Routes = append(r.Routes, route)
 }
 
-func patternToRegex(pattern string) *regexp.Regexp {
+func readPatternAndKeys(pattern string) (*regexp.Regexp, []string) {
+	var keys []string
+
 	splited := strings.Split(pattern, "/")
 	for i, v := range splited {
 		if strings.HasPrefix(v, ":") {
+			keys = append(keys, v[1:])
 			splited[i] = `([\w\._-]+)`
 		}
 	}
 	regexStr := fmt.Sprintf("^%s$", strings.Join(splited, "/"))
-	return regexp.MustCompile(regexStr)
+	return regexp.MustCompile(regexStr), keys
 }
 
 func (r *Router) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	ctx := &Context{Request: request, ResponseWriter: writer}
+	ctx := &Context{
+		Request:        request,
+		ResponseWriter: writer,
+		Params:         make(map[string]string),
+	}
 
 	for _, rt := range r.Routes {
+		if request.Method != rt.Method {
+			continue
+		}
 
 		if matches := rt.Pattern.FindStringSubmatch(ctx.URL.Path); len(matches) > 0 {
-			if request.Method != rt.Method {
-				ctx.WriteError(http.StatusMethodNotAllowed, "Method not allowed")
-				return
+			if len(matches) > 1 && len(rt.Keys) == len(matches[1:]) {
+				ctx.setURLValues(rt.Keys, matches[1:])
 			}
-
-			if len(matches) > 1 {
-				ctx.Params = matches[1:]
-			}
-
 			rt.Handler(ctx)
 			return
 		}
