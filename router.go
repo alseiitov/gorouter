@@ -1,7 +1,6 @@
 package gorouter
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -10,25 +9,15 @@ import (
 
 type Handler func(*Context)
 
-type Router struct {
-	Routes       []Route
-	DefaultRoute Handler
-}
-
 type Route struct {
 	Pattern *regexp.Regexp
 	Handler Handler
 	Method  string
 }
 
-type Context struct {
-	http.ResponseWriter
-	*http.Request
-	Params []string
-}
-
-type Error struct {
-	Error string `json:"error"`
+type Router struct {
+	Routes       []Route
+	DefaultRoute Handler
 }
 
 func NewRouter() *Router {
@@ -90,26 +79,4 @@ func (r *Router) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	ctx.WriteError(http.StatusNotFound, "404 Not Found")
-}
-
-func (ctx *Context) WriteString(code int, body string) {
-	ctx.ResponseWriter.Header().Set("Content-Type", "text/plain")
-	ctx.WriteHeader(code)
-
-	ctx.ResponseWriter.Write([]byte(body))
-}
-
-func (ctx *Context) WriteJSON(code int, body []byte) {
-	ctx.ResponseWriter.Header().Set("Content-Type", "application/json")
-	ctx.WriteHeader(code)
-
-	ctx.ResponseWriter.Write(body)
-}
-
-func (ctx *Context) WriteError(code int, err string) {
-	ctx.ResponseWriter.Header().Set("Content-Type", "application/json")
-	ctx.WriteHeader(code)
-
-	jsonData, _ := json.Marshal(&Error{Error: err})
-	ctx.ResponseWriter.Write(jsonData)
 }
