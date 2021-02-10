@@ -37,6 +37,10 @@ func (r *Router) DELETE(pattern string, handler Handler) {
 	r.handle(pattern, handler, http.MethodDelete)
 }
 
+func (r *Router) PUT(pattern string, handler Handler) {
+	r.handle(pattern, handler, http.MethodPut)
+}
+
 func (r *Router) PATCH(pattern string, handler Handler) {
 	r.handle(pattern, handler, http.MethodPatch)
 }
