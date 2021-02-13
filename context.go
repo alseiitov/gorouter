@@ -2,6 +2,7 @@ package gorouter
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -35,6 +36,19 @@ func (ctx *Context) WriteError(code int, err string) {
 
 	jsonData, _ := json.Marshal(&Error{Error: err})
 	ctx.ResponseWriter.Write(jsonData)
+}
+
+func (ctx *Context) ReadBody(data interface{}) error {
+	body, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(body, data)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ctx *Context) setURLValues(keys, values []string) {
