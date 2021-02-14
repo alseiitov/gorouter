@@ -7,7 +7,7 @@ Reimplemented [Custom HTTP Routing in Go](https://gist.github.com/reagent/043da4
 
 ### Install
 ```sh
-$ go get github.com/alseiitov/gorouter
+$ go get -u github.com/alseiitov/gorouter
 ```
 
 
@@ -16,14 +16,13 @@ $ go get github.com/alseiitov/gorouter
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/alseiitov/gorouter"
 )
 
-type data struct {
+type response struct {
 	Name string `json:"name"`
 	Age  string `json:"age"`
 }
@@ -32,17 +31,17 @@ func userHandler(ctx *gorouter.Context) {
 	name := ctx.Params["name"]
 	age := ctx.Params["age"]
 
-	jsonData, _ := json.Marshal(&data{Name: name, Age: age})
-	ctx.WriteJSON(http.StatusOK, jsonData)
+	err := ctx.WriteJSON(http.StatusOK, response{Name: name, Age: age})
+	if err != nil {
+		ctx.WriteError(http.StatusInternalServerError, err.Error())
+	}
 }
 
 func main() {
 	router := gorouter.NewRouter()
 	router.GET(`/user/:name/:age`, userHandler)
 
-	if err := http.ListenAndServe(":9000", router); err != nil {
-		log.Fatalln(err.Error())
-	}
+	log.Fatalln(http.ListenAndServe(":9000", router))
 }
 
 ```
@@ -51,8 +50,8 @@ func main() {
 $ curl -i "http://localhost:9000/user/John/23" 
 HTTP/1.1 200 OK
 Content-Type: application/json
-Date: Sat, 06 Feb 2021 18:10:29 GMT
-Content-Length: 26
+Date: Sun, 14 Feb 2021 17:03:22 GMT
+Content-Length: 27
 
 {"name":"John","age":"23"}
 ```

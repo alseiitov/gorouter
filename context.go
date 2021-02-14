@@ -23,11 +23,16 @@ func (ctx *Context) WriteString(code int, body string) {
 	ctx.ResponseWriter.Write([]byte(body))
 }
 
-func (ctx *Context) WriteJSON(code int, body []byte) {
+func (ctx *Context) WriteJSON(code int, data interface{}) error {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
 	ctx.ResponseWriter.Header().Set("Content-Type", "application/json")
 	ctx.WriteHeader(code)
 
-	ctx.ResponseWriter.Write(body)
+	ctx.ResponseWriter.Write(jsonData)
+	return nil
 }
 
 func (ctx *Context) WriteError(code int, err string) {
