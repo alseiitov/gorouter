@@ -28,8 +28,8 @@ type response struct {
 }
 
 func userHandler(ctx *gorouter.Context) {
-	name := ctx.Params["name"]
-	age := ctx.Params["age"]
+	name, _ := ctx.GetParam("name")
+	age, _ := ctx.GetParam("age")
 
 	err := ctx.WriteJSON(http.StatusOK, response{Name: name, Age: age})
 	if err != nil {

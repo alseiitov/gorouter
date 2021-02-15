@@ -58,10 +58,15 @@ func (ctx *Context) ReadBody(data interface{}) error {
 
 func (ctx *Context) setURLValues(keys, values []string) {
 	for i, key := range keys {
-		ctx.Set(key, values[i])
+		ctx.SetParam(key, values[i])
 	}
 }
 
-func (ctx *Context) Set(key, value string) {
+func (ctx *Context) SetParam(key string, value string) {
 	ctx.Params[key] = value
+}
+
+func (ctx *Context) GetParam(key string) (string, bool) {
+	value, ok := ctx.Params[key]
+	return value, ok
 }
