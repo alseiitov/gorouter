@@ -2,8 +2,10 @@ package gorouter
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 type Context struct {
@@ -66,7 +68,24 @@ func (ctx *Context) SetParam(key string, value string) {
 	ctx.Params[key] = value
 }
 
-func (ctx *Context) GetParam(key string) (string, bool) {
+func (ctx *Context) GetStringParam(key string) (string, error) {
 	value, ok := ctx.Params[key]
-	return value, ok
+	if !ok {
+		return "", fmt.Errorf("%s value not found", key)
+	}
+	return value, nil
+}
+
+func (ctx *Context) GetIntParam(key string) (int, error) {
+	value, ok := ctx.Params[key]
+	if !ok {
+		return 0, fmt.Errorf("%s value not found", key)
+	}
+
+	n, err := strconv.Atoi(value)
+	if err != nil {
+		return 0, fmt.Errorf("%s value must be integer", key)
+	}
+
+	return n, nil
 }

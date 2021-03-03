@@ -24,21 +24,27 @@ import (
 
 type response struct {
 	Name string `json:"name"`
-	Age  string `json:"age"`
+	Age  int    `json:"age"`
 }
 
-func userHandler(ctx *gorouter.Context) {
-	name, _ := ctx.GetParam("name")
-	age, _ := ctx.GetParam("age")
-
-	err := ctx.WriteJSON(http.StatusOK, response{Name: name, Age: age})
+func userHandler(ctx *gor.Context) {
+	name, err := ctx.GetStringParam("name")
 	if err != nil {
-		ctx.WriteError(http.StatusInternalServerError, err.Error())
+		ctx.WriteError(http.StatusBadRequest, err.Error())
+		return
 	}
+
+	age, err := ctx.GetIntParam("age")
+	if err != nil {
+		ctx.WriteError(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	ctx.WriteJSON(http.StatusOK, response{Name: name, Age: age})
 }
 
 func main() {
-	router := gorouter.NewRouter()
+	router := gor.NewRouter()
 	router.GET(`/user/:name/:age`, userHandler)
 
 	log.Fatalln(http.ListenAndServe(":9000", router))
@@ -50,8 +56,8 @@ func main() {
 $ curl -i "http://localhost:9000/user/John/23" 
 HTTP/1.1 200 OK
 Content-Type: application/json
-Date: Sun, 14 Feb 2021 17:03:22 GMT
-Content-Length: 27
+Date: Wed, 03 Mar 2021 09:56:53 GMT
+Content-Length: 24
 
-{"name":"John","age":"23"}
+{"name":"John","age":23}
 ```
