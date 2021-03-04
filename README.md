@@ -27,7 +27,7 @@ type response struct {
 	Age  int    `json:"age"`
 }
 
-func userHandler(ctx *gor.Context) {
+func userHandler(ctx *gorouter.Context) {
 	name, err := ctx.GetStringParam("name")
 	if err != nil {
 		ctx.WriteError(http.StatusBadRequest, err.Error())
@@ -44,7 +44,7 @@ func userHandler(ctx *gor.Context) {
 }
 
 func main() {
-	router := gor.NewRouter()
+	router := gorouter.NewRouter()
 	router.GET(`/user/:name/:age`, userHandler)
 
 	log.Fatalln(http.ListenAndServe(":9000", router))
