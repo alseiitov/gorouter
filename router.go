@@ -61,6 +61,9 @@ func readPatternAndKeys(pattern string) (*regexp.Regexp, []string) {
 			keys = append(keys, v[1:])
 			splited[i] = `([\w\._-]+)`
 		}
+		if v == "*" {
+			splited[i] = `([\w\._-]+)`
+		}
 	}
 	regexStr := fmt.Sprintf("^%s$", strings.Join(splited, "/"))
 	return regexp.MustCompile(regexStr), keys
