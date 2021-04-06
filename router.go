@@ -45,6 +45,12 @@ func (r *Router) PATCH(pattern string, handler Handler) {
 	r.handle(pattern, handler, http.MethodPatch)
 }
 
+func WrapHandler(h http.Handler) Handler {
+	return func(ctx *Context) {
+		h.ServeHTTP(ctx.ResponseWriter, ctx.Request)
+	}
+}
+
 func (r *Router) handle(pattern string, handler Handler, method string) {
 	regex, keys := readPatternAndKeys(pattern)
 	route := Route{Pattern: regex, Handler: handler, Method: method, Keys: keys}
@@ -54,17 +60,19 @@ func (r *Router) handle(pattern string, handler Handler, method string) {
 
 func readPatternAndKeys(pattern string) (*regexp.Regexp, []string) {
 	var keys []string
-
 	splited := strings.Split(pattern, "/")
+
 	for i, v := range splited {
 		if strings.HasPrefix(v, ":") {
 			keys = append(keys, v[1:])
 			splited[i] = `([\w\._-]+)`
 		}
 		if v == "*" {
+			keys = append(keys, fmt.Sprintf("param%d", i))
 			splited[i] = `([\w\._-]+)`
 		}
 	}
+
 	regexStr := fmt.Sprintf("^%s$", strings.Join(splited, "/"))
 	return regexp.MustCompile(regexStr), keys
 }
