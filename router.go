@@ -85,7 +85,7 @@ func (r *Router) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	for _, rt := range r.Routes {
-		if request.Method != rt.Method {
+		if request.Method != rt.Method && request.Method != http.MethodOptions {
 			continue
 		}
 
